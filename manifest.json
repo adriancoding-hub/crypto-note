@@ -1,7 +1,7 @@
 {
   "name": "Crypto Note Files",
   "short_name": "Crypto Note",
-  "description": "Offline encryption tool for text and files.",
+  "description": "Offline crypto",
   "lang": "ro",
   "start_url": "./index.html",
   "scope": "./",
