@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crypto Note (Offline)</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --fg:#111111;
+      --muted:#555555;
+      --line:#d9d9d9;
+      --soft:#f3f3f3;
+      --card:#ffffff;
+      --maxw:min(96vw, 980px);
+      --base:clamp(16px, 1.1vw + 13px, 28px);
+      --small:clamp(13px, 0.7vw + 11px, 20px);
+      --h1:clamp(22px, 1.8vw + 16px, 42px);
+      --h3:clamp(18px, 1.3vw + 14px, 32px);
+      --pad:clamp(12px, 1vw + 10px, 24px);
+      --radius:clamp(14px, 1vw + 10px, 22px);
+      --btnpad-y:clamp(10px, 0.7vw + 8px, 16px);
+      --btnpad-x:clamp(12px, 1vw + 10px, 18px);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    body{
+      display:flex;
+      justify-content:center;
+      padding:18px;
+      line-height:1.35;
+      font-size:var(--base);
+    }
+    .wrap{
+      width:var(--maxw);
+      margin:0 auto;
+    }
+    .topbar{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    .lang-switch{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      background:var(--soft);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:6px;
+    }
+    .flag-btn{
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      font-size:clamp(22px, 1.5vw + 16px, 34px);
+      line-height:1;
+      padding:6px 8px;
+      border-radius:999px;
+      opacity:.65;
+      transition:opacity .15s ease, transform .15s ease, background .15s ease;
+    }
+    .flag-btn.active{
+      opacity:1;
+      background:#fff;
+      box-shadow:0 1px 3px rgba(0,0,0,.08);
+    }
+    .flag-btn:active{transform:scale(.98)}
+    h2{
+      margin:0 0 8px;
+      font-size:var(--h1);
+    }
+    small,.small{
+      color:var(--muted);
+      font-size:var(--small);
+    }
+    .row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin:12px 0;
+    }
+    textarea,input,select{
+      width:100%;
+      font-size:var(--base);
+      padding:var(--pad);
+      border:1px solid #cfcfcf;
+      border-radius:var(--radius);
+      background:#fff;
+    }
+    textarea{
+      min-height:clamp(120px, 16vw, 220px);
+      resize:vertical;
+    }
+    button{
+      font-size:var(--base);
+      padding:var(--btnpad-y) var(--btnpad-x);
+      border:0;
+      border-radius:calc(var(--radius) - 4px);
+      cursor:pointer;
+    }
+    .btn{background:#111;color:#fff}
+    .btn2{background:#eee;color:#111}
+    .card{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:var(--pad);
+      margin:14px 0;
+      background:var(--card);
+      box-shadow:0 1px 3px rgba(0,0,0,.03);
+    }
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      word-break:break-word;
+    }
+    .stack > * + *{margin-top:10px}
+    .grow{flex:1 1 260px}
+    .result-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    label span{
+      display:block;
+      margin-bottom:6px;
+    }
+    @media (min-width: 900px){
+      body{padding:28px}
+      .wrap{max-width:1100px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="lang-switch" aria-label="Language switcher">
+        <button class="flag-btn active" id="lang-ro" onclick="setLang('ro')" aria-label="Română">🇷🇴</button>
+        <button class="flag-btn" id="lang-en" onclick="setLang('en')" aria-label="English">🇬🇧</button>
+      </div>
+    </div>
+
+    <h2 data-i18n="title">Crypto Note (Offline)</h2>
+    <div class="small" data-i18n="subtitle">Un fișier local. Criptează/decriptează în browser cu AES-256-GCM. Trimite doar „BLOB”-ul.</div>
+
+    <div class="card">
+      <div class="stack">
+        <label>
+          <span data-i18n="input_label">Mesaj (plaintext pentru Encrypt / BLOB pentru Decrypt)</span>
+          <textarea id="input" data-i18n-ph="input_ph" placeholder="Scrie aici mesajul SAU lipește aici BLOB-ul primit..."></textarea>
+        </label>
+
+        <label>
+          <span data-i18n="password_label">Parolă comună (nu o trimite în același canal)</span>
+          <input id="pw" type="password" data-i18n-ph="password_ph" placeholder="Parola comună" autocomplete="off" autocapitalize="off" spellcheck="false">
+        </label>
+
+        <div class="row">
+          <button class="btn2" onclick="genPass()" data-i18n="gen_pass">Generează parolă random</button>
+          <button class="btn2" onclick="copyText('pw')" data-i18n="copy_pass">Copy parolă</button>
+          <button class="btn2" onclick="togglePw()" data-i18n="toggle_pass">Afișează/ascunde</button>
+        </div>
+
+        <div class="row">
+          <label class="grow">
+            <span data-i18n="autoclear_label">Auto-ștergere după</span>
+            <select id="ttl">
+              <option value="0" data-i18n="ttl0">Nu șterge automat</option>
+              <option value="15" data-i18n="ttl15">15 secunde</option>
+              <option value="30" selected data-i18n="ttl30">30 secunde</option>
+              <option value="60" data-i18n="ttl60">60 secunde</option>
+              <option value="120" data-i18n="ttl120">2 minute</option>
+            </select>
+          </label>
+          <label class="grow">
+            <span data-i18n="mode_label">Mod</span>
+            <select id="mode">
+              <option value="encrypt" data-i18n="mode_encrypt">Encrypt</option>
+              <option value="decrypt" data-i18n="mode_decrypt">Decrypt</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row">
+          <button class="btn" onclick="run()" data-i18n="run">Rulează</button>
+          <button class="btn2" onclick="clearAll()" data-i18n="clear">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="result-head">
+        <div><b data-i18n="result_title">Rezultat</b> <span class="small" data-i18n="result_hint">(copiază și trimite)</span></div>
+        <button class="btn2" onclick="copyResult()" data-i18n="copy_result">Copy rezultat</button>
+      </div>
+      <textarea id="output" class="mono" data-i18n-ph="output_ph" placeholder="Aici apare BLOB-ul criptat sau mesajul decriptat..." readonly></textarea>
+      <small id="status"></small>
+    </div>
+  </div>
+
+<script>
+  const i18n = {
+    ro: {
+      title: "Crypto Note (Offline)",
+      subtitle: "Un fișier local. Criptează/decriptează în browser cu AES-256-GCM. Trimite doar „BLOB”-ul.",
+      input_label: "Mesaj (plaintext pentru Encrypt / BLOB pentru Decrypt)",
+      input_ph: "Scrie aici mesajul SAU lipește aici BLOB-ul primit...",
+      password_label: "Parolă comună (nu o trimite în același canal)",
+      password_ph: "Parola comună",
+      gen_pass: "Generează parolă random",
+      copy_pass: "Copy parolă",
+      toggle_pass: "Afișează/ascunde",
+      autoclear_label: "Auto-ștergere după",
+      ttl0: "Nu șterge automat",
+      ttl15: "15 secunde",
+      ttl30: "30 secunde",
+      ttl60: "60 secunde",
+      ttl120: "2 minute",
+      mode_label: "Mod",
+      mode_encrypt: "Encrypt",
+      mode_decrypt: "Decrypt",
+      run: "Rulează",
+      clear: "Clear",
+      result_title: "Rezultat",
+      result_hint: "(copiază și trimite)",
+      copy_result: "Copy rezultat",
+      output_ph: "Aici apare BLOB-ul criptat sau mesajul decriptat...",
+      status_copied: "Copiat.",
+      status_result_copied: "Rezultat copiat.",
+      status_generated: "Parolă random generată.",
+      status_cleared: "Curățat.",
+      status_autoclear_in: (ttl) => `Auto-clear în ${ttl}s.`,
+      status_autoclear_off: "Auto-clear dezactivat.",
+      status_autoclear_done: "Auto-clear făcut.",
+      err_need_password: "Scrie o parolă (sau apasă Generează parolă).",
+      err_need_input: "Scrie un mesaj sau lipește un BLOB.",
+      status_encrypted: "Criptat. Copiază BLOB-ul și trimite-l.",
+      status_decrypted: "Decriptat.",
+      status_decrypt_fail: "Parolă greșită sau text criptat corupt."
+    },
+    en: {
+      title: "Crypto Note (Offline)",
+      subtitle: "A local file. Encrypts/decrypts in the browser with AES-256-GCM. Send only the “BLOB”.",
+      input_label: "Message (plaintext for Encrypt / BLOB for Decrypt)",
+      input_ph: "Write the message here OR paste the received BLOB here...",
+      password_label: "Shared password (do not send it in the same channel)",
+      password_ph: "Shared password",
+      gen_pass: "Generate random password",
+      copy_pass: "Copy password",
+      toggle_pass: "Show/hide",
+      autoclear_label: "Auto-clear after",
+      ttl0: "Do not auto-clear",
+      ttl15: "15 seconds",
+      ttl30: "30 seconds",
+      ttl60: "60 seconds",
+      ttl120: "2 minutes",
+      mode_label: "Mode",
+      mode_encrypt: "Encrypt",
+      mode_decrypt: "Decrypt",
+      run: "Run",
+      clear: "Clear",
+      result_title: "Result",
+      result_hint: "(copy and send)",
+      copy_result: "Copy result",
+      output_ph: "The encrypted BLOB or decrypted message appears here...",
+      status_copied: "Copied.",
+      status_result_copied: "Result copied.",
+      status_generated: "Random password generated.",
+      status_cleared: "Cleared.",
+      status_autoclear_in: (ttl) => `Auto-clear in ${ttl}s.`,
+      status_autoclear_off: "Auto-clear disabled.",
+      status_autoclear_done: "Auto-clear completed.",
+      err_need_password: "Enter a password (or press Generate random password).",
+      err_need_input: "Write a message or paste a BLOB.",
+      status_encrypted: "Encrypted. Copy the BLOB and send it.",
+      status_decrypted: "Decrypted.",
+      status_decrypt_fail: "Wrong password or corrupted encrypted text."
+    }
+  };
+
+  let currentLang = "ro";
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+  let clearTimer = null;
+
+  function t(key, ...args){
+    const val = i18n[currentLang][key];
+    return typeof val === "function" ? val(...args) : val;
+  }
+
+  function setLang(lang){
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.getElementById("lang-ro").classList.toggle("active", lang === "ro");
+    document.getElementById("lang-en").classList.toggle("active", lang === "en");
+
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      el.textContent = t(key);
+    });
+
+    document.querySelectorAll("[data-i18n-ph]").forEach(el => {
+      const key = el.getAttribute("data-i18n-ph");
+      el.placeholder = t(key);
+    });
+  }
+
+  function setStatus(msg){ document.getElementById("status").textContent = msg; }
+
+  function b64e(bytes){
+    let bin = "";
+    bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  }
+
+  function b64d(str){
+    str = str.replace(/-/g,"+").replace(/_/g,"/");
+    const pad = "===".slice((str.length + 3) % 4);
+    const bin = atob(str + pad);
+    const out = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
+    return out;
+  }
+
+  function randBytes(n){
+    const a = new Uint8Array(n);
+    crypto.getRandomValues(a);
+    return a;
+  }
+
+  function scheduleAutoClear(){
+    const ttl = parseInt(document.getElementById("ttl").value,10);
+    if(clearTimer){ clearTimeout(clearTimer); clearTimer = null; }
+    if(ttl > 0){
+      clearTimer = setTimeout(() => {
+        clearAll();
+        setStatus(t("status_autoclear_done"));
+      }, ttl * 1000);
+      setStatus(t("status_autoclear_in", ttl));
+    } else {
+      setStatus(t("status_autoclear_off"));
+    }
+  }
+
+  function clearAll(){
+    document.getElementById("input").value = "";
+    document.getElementById("output").value = "";
+    setStatus(t("status_cleared"));
+    if(clearTimer){ clearTimeout(clearTimer); clearTimer = null; }
+  }
+
+  async function copyToClipboard(text){
+    try{
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch(e){}
+    return false;
+  }
+
+  async function copyText(id){
+    const el = document.getElementById(id);
+    const ok = await copyToClipboard(el.value);
+    if(!ok){
+      el.select();
+      el.setSelectionRange(0, 999999);
+      document.execCommand("copy");
+    }
+    setStatus(t("status_copied"));
+  }
+
+  async function copyResult(){
+    const el = document.getElementById("output");
+    const ok = await copyToClipboard(el.value);
+    if(!ok){
+      el.select();
+      el.setSelectionRange(0, 999999);
+      document.execCommand("copy");
+    }
+    setStatus(t("status_result_copied"));
+  }
+
+  function togglePw(){
+    const pw = document.getElementById("pw");
+    pw.type = (pw.type === "password") ? "text" : "password";
+  }
+
+  function genPass(){
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const bytes = randBytes(20);
+    let out = "";
+    for(let i=0;i<20;i++){
+      out += alphabet[bytes[i] % alphabet.length];
+      if((i % 4 === 3) && i !== 19) out += "-";
+    }
+    document.getElementById("pw").value = out;
+    setStatus(t("status_generated"));
+  }
+
+  async function deriveKey(password, salt){
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw", enc.encode(password), {name:"PBKDF2"}, false, ["deriveKey"]
+    );
+    return crypto.subtle.deriveKey(
+      {name:"PBKDF2", salt, iterations: 250000, hash:"SHA-256"},
+      keyMaterial,
+      {name:"AES-GCM", length:256},
+      false,
+      ["encrypt","decrypt"]
+    );
+  }
+
+  async function encryptMessage(password, plaintext){
+    const salt = randBytes(16);
+    const iv   = randBytes(12);
+    const key  = await deriveKey(password, salt);
+    const ct   = new Uint8Array(await crypto.subtle.encrypt(
+      {name:"AES-GCM", iv},
+      key,
+      enc.encode(plaintext)
+    ));
+    return "v1." + b64e(salt) + "." + b64e(iv) + "." + b64e(ct);
+  }
+
+  async function decryptMessage(password, blob){
+    if(!blob.startsWith("v1.")) throw new Error("invalid blob");
+    const parts = blob.split(".");
+    if(parts.length !== 4) throw new Error("invalid blob");
+    const salt = b64d(parts[1]);
+    const iv   = b64d(parts[2]);
+    const ct   = b64d(parts[3]);
+    const key  = await deriveKey(password, salt);
+    const ptBuf = await crypto.subtle.decrypt(
+      {name:"AES-GCM", iv},
+      key,
+      ct
+    );
+    return dec.decode(ptBuf);
+  }
+
+  async function run(){
+    try{
+      const mode = document.getElementById("mode").value;
+      const input = document.getElementById("input").value.trim();
+      const pw = document.getElementById("pw").value;
+
+      if(!pw){ setStatus(t("err_need_password")); return; }
+      if(!input){ setStatus(t("err_need_input")); return; }
+
+      if(mode === "encrypt"){
+        const blob = await encryptMessage(pw, input);
+        document.getElementById("output").value = blob;
+        setStatus(t("status_encrypted"));
+      } else {
+        const pt = await decryptMessage(pw, input);
+        document.getElementById("output").value = pt;
+        setStatus(t("status_decrypted"));
+      }
+      scheduleAutoClear();
+    } catch(e){
+      document.getElementById("output").value = "";
+      setStatus(t("status_decrypt_fail"));
+      scheduleAutoClear();
+    }
+  }
+
+  setLang("ro");
+</script>
+</body>
+</html>
