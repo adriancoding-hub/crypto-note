@@ -6,131 +6,33 @@
   <title>Crypto Note (Offline)</title>
   <style>
     :root{
-      --bg:#ffffff;
-      --fg:#111111;
-      --muted:#555555;
-      --line:#d9d9d9;
-      --soft:#f3f3f3;
-      --card:#ffffff;
-      --maxw:min(96vw, 980px);
-      --base:clamp(16px, 1.1vw + 13px, 28px);
-      --small:clamp(13px, 0.7vw + 11px, 20px);
-      --h1:clamp(22px, 1.8vw + 16px, 42px);
-      --h3:clamp(18px, 1.3vw + 14px, 32px);
-      --pad:clamp(12px, 1vw + 10px, 24px);
-      --radius:clamp(14px, 1vw + 10px, 22px);
-      --btnpad-y:clamp(10px, 0.7vw + 8px, 16px);
-      --btnpad-x:clamp(12px, 1vw + 10px, 18px);
+      --bg:#ffffff;--fg:#111111;--muted:#555555;--line:#d9d9d9;--soft:#f3f3f3;--card:#ffffff;
+      --maxw:min(96vw, 980px);--base:clamp(16px, 1.1vw + 13px, 28px);--small:clamp(13px, 0.7vw + 11px, 20px);
+      --h1:clamp(22px, 1.8vw + 16px, 42px);--pad:clamp(12px, 1vw + 10px, 24px);--radius:clamp(14px, 1vw + 10px, 22px);
+      --btnpad-y:clamp(10px, 0.7vw + 8px, 16px);--btnpad-x:clamp(12px, 1vw + 10px, 18px);
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif}
-    body{
-      display:flex;
-      justify-content:center;
-      padding:18px;
-      line-height:1.35;
-      font-size:var(--base);
-    }
-    .wrap{
-      width:var(--maxw);
-      margin:0 auto;
-    }
-    .topbar{
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-      margin-bottom:10px;
-    }
-    .lang-switch{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      background:var(--soft);
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:6px;
-    }
-    .flag-btn{
-      border:0;
-      background:transparent;
-      cursor:pointer;
-      font-size:clamp(22px, 1.5vw + 16px, 34px);
-      line-height:1;
-      padding:6px 8px;
-      border-radius:999px;
-      opacity:.65;
-      transition:opacity .15s ease, transform .15s ease, background .15s ease;
-    }
-    .flag-btn.active{
-      opacity:1;
-      background:#fff;
-      box-shadow:0 1px 3px rgba(0,0,0,.08);
-    }
+    body{display:flex;justify-content:center;padding:18px;line-height:1.35;font-size:var(--base)}
+    .wrap{width:var(--maxw);margin:0 auto}
+    .topbar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:10px}
+    .lang-switch{display:flex;gap:8px;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:6px}
+    .flag-btn{border:0;background:transparent;cursor:pointer;font-size:clamp(22px, 1.5vw + 16px, 34px);line-height:1;padding:6px 8px;border-radius:999px;opacity:.65;transition:opacity .15s ease, transform .15s ease, background .15s ease}
+    .flag-btn.active{opacity:1;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}
     .flag-btn:active{transform:scale(.98)}
-    h2{
-      margin:0 0 8px;
-      font-size:var(--h1);
-    }
-    small,.small{
-      color:var(--muted);
-      font-size:var(--small);
-    }
-    .row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      margin:12px 0;
-    }
-    textarea,input,select{
-      width:100%;
-      font-size:var(--base);
-      padding:var(--pad);
-      border:1px solid #cfcfcf;
-      border-radius:var(--radius);
-      background:#fff;
-    }
-    textarea{
-      min-height:clamp(120px, 16vw, 220px);
-      resize:vertical;
-    }
-    button{
-      font-size:var(--base);
-      padding:var(--btnpad-y) var(--btnpad-x);
-      border:0;
-      border-radius:calc(var(--radius) - 4px);
-      cursor:pointer;
-    }
-    .btn{background:#111;color:#fff}
-    .btn2{background:#eee;color:#111}
-    .card{
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      padding:var(--pad);
-      margin:14px 0;
-      background:var(--card);
-      box-shadow:0 1px 3px rgba(0,0,0,.03);
-    }
-    .mono{
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-      word-break:break-word;
-    }
-    .stack > * + *{margin-top:10px}
-    .grow{flex:1 1 260px}
-    .result-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    label span{
-      display:block;
-      margin-bottom:6px;
-    }
-    @media (min-width: 900px){
-      body{padding:28px}
-      .wrap{max-width:1100px}
-    }
+    h2{margin:0 0 8px;font-size:var(--h1)}
+    small,.small{color:var(--muted);font-size:var(--small)}
+    .row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+    textarea,input,select{width:100%;font-size:var(--base);padding:var(--pad);border:1px solid #cfcfcf;border-radius:var(--radius);background:#fff}
+    textarea{min-height:clamp(120px, 16vw, 220px);resize:vertical}
+    button{font-size:var(--base);padding:var(--btnpad-y) var(--btnpad-x);border:0;border-radius:calc(var(--radius) - 4px);cursor:pointer}
+    .btn{background:#111;color:#fff}.btn2{background:#eee;color:#111}
+    .card{border:1px solid var(--line);border-radius:var(--radius);padding:var(--pad);margin:14px 0;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.03)}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;word-break:break-word}
+    .stack > * + *{margin-top:10px}.grow{flex:1 1 260px}
+    .result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    label span{display:block;margin-bottom:6px}
+    @media (min-width:900px){body{padding:28px}.wrap{max-width:1100px}}
   </style>
 </head>
 <body>
@@ -185,7 +87,7 @@
 
         <div class="row">
           <button class="btn" onclick="run()" data-i18n="run">Rulează</button>
-          <button class="btn2" onclick="clearAll()" data-i18n="clear">Clear</button>
+          <button class="btn2" onclick="clearAll(true)" data-i18n="clear">Clear</button>
         </div>
       </div>
     </div>
@@ -295,12 +197,10 @@
     document.documentElement.lang = lang;
     document.getElementById("lang-ro").classList.toggle("active", lang === "ro");
     document.getElementById("lang-en").classList.toggle("active", lang === "en");
-
     document.querySelectorAll("[data-i18n]").forEach(el => {
       const key = el.getAttribute("data-i18n");
       el.textContent = t(key);
     });
-
     document.querySelectorAll("[data-i18n-ph]").forEach(el => {
       const key = el.getAttribute("data-i18n-ph");
       el.placeholder = t(key);
@@ -335,7 +235,7 @@
     if(clearTimer){ clearTimeout(clearTimer); clearTimer = null; }
     if(ttl > 0){
       clearTimer = setTimeout(() => {
-        clearAll();
+        clearAll(false);
         setStatus(t("status_autoclear_done"));
       }, ttl * 1000);
       setStatus(t("status_autoclear_in", ttl));
@@ -344,10 +244,14 @@
     }
   }
 
-  function clearAll(){
+  function clearAll(showStatus = true){
     document.getElementById("input").value = "";
     document.getElementById("output").value = "";
-    setStatus(t("status_cleared"));
+    document.getElementById("pw").value = "";
+    document.getElementById("pw").type = "password";
+    if(showStatus){
+      setStatus(t("status_cleared"));
+    }
     if(clearTimer){ clearTimeout(clearTimer); clearTimer = null; }
   }
 
@@ -401,11 +305,9 @@
   }
 
   async function deriveKey(password, salt){
-    const keyMaterial = await crypto.subtle.importKey(
-      "raw", enc.encode(password), {name:"PBKDF2"}, false, ["deriveKey"]
-    );
+    const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), {name:"PBKDF2"}, false, ["deriveKey"]);
     return crypto.subtle.deriveKey(
-      {name:"PBKDF2", salt, iterations: 250000, hash:"SHA-256"},
+      {name:"PBKDF2", salt, iterations:250000, hash:"SHA-256"},
       keyMaterial,
       {name:"AES-GCM", length:256},
       false,
@@ -415,9 +317,9 @@
 
   async function encryptMessage(password, plaintext){
     const salt = randBytes(16);
-    const iv   = randBytes(12);
-    const key  = await deriveKey(password, salt);
-    const ct   = new Uint8Array(await crypto.subtle.encrypt(
+    const iv = randBytes(12);
+    const key = await deriveKey(password, salt);
+    const ct = new Uint8Array(await crypto.subtle.encrypt(
       {name:"AES-GCM", iv},
       key,
       enc.encode(plaintext)
@@ -430,9 +332,9 @@
     const parts = blob.split(".");
     if(parts.length !== 4) throw new Error("invalid blob");
     const salt = b64d(parts[1]);
-    const iv   = b64d(parts[2]);
-    const ct   = b64d(parts[3]);
-    const key  = await deriveKey(password, salt);
+    const iv = b64d(parts[2]);
+    const ct = b64d(parts[3]);
+    const key = await deriveKey(password, salt);
     const ptBuf = await crypto.subtle.decrypt(
       {name:"AES-GCM", iv},
       key,
@@ -446,7 +348,6 @@
       const mode = document.getElementById("mode").value;
       const input = document.getElementById("input").value.trim();
       const pw = document.getElementById("pw").value;
-
       if(!pw){ setStatus(t("err_need_password")); return; }
       if(!input){ setStatus(t("err_need_input")); return; }
 
