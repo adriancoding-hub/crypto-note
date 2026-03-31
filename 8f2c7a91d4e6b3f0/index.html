@@ -3,13 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Crypto Note (Offline)</title>
+  <title>Crypto Note Files Compact</title>
   <style>
     :root{
-      --bg:#ffffff;--fg:#111111;--muted:#555555;--line:#d9d9d9;--soft:#f3f3f3;--card:#ffffff;
-      --maxw:min(96vw, 980px);--base:clamp(16px, 1.1vw + 13px, 28px);--small:clamp(13px, 0.7vw + 11px, 20px);
-      --h1:clamp(22px, 1.8vw + 16px, 42px);--pad:clamp(12px, 1vw + 10px, 24px);--radius:clamp(14px, 1vw + 10px, 22px);
-      --btnpad-y:clamp(10px, 0.7vw + 8px, 16px);--btnpad-x:clamp(12px, 1vw + 10px, 18px);
+      --bg:#ffffff; --fg:#111111; --muted:#555555; --line:#d9d9d9; --soft:#f3f3f3; --card:#ffffff;
+      --field-bg:#ffffff; --field-line:#cfcfcf; --btn2-bg:#eeeeee; --btn2-fg:#111111;
+      --maxw:min(96vw, 1080px);
+      --base:clamp(16px, 1.1vw + 13px, 28px);
+      --small:clamp(13px, 0.7vw + 11px, 20px);
+      --h1:clamp(22px, 1.8vw + 16px, 42px);
+      --pad:clamp(12px, 1vw + 10px, 24px);
+      --radius:clamp(14px, 1vw + 10px, 22px);
+      --btnpad-y:clamp(10px, 0.7vw + 8px, 16px);
+      --btnpad-x:clamp(12px, 1vw + 10px, 18px);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0f1115; --fg:#f2f4f8; --muted:#aab3c2; --line:#2a3140; --soft:#1a202b; --card:#131923;
+        --field-bg:#0f141d; --field-line:#344055; --btn2-bg:#242c3a; --btn2-fg:#f2f4f8;
+      }
+    }
+    [data-theme="light"]{
+      --bg:#ffffff; --fg:#111111; --muted:#555555; --line:#d9d9d9; --soft:#f3f3f3; --card:#ffffff;
+      --field-bg:#ffffff; --field-line:#cfcfcf; --btn2-bg:#eeeeee; --btn2-fg:#111111;
+    }
+    [data-theme="dark"]{
+      --bg:#0f1115; --fg:#f2f4f8; --muted:#aab3c2; --line:#2a3140; --soft:#1a202b; --card:#131923;
+      --field-bg:#0f141d; --field-line:#344055; --btn2-bg:#242c3a; --btn2-fg:#f2f4f8;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif}
@@ -17,175 +37,283 @@
     .wrap{width:var(--maxw);margin:0 auto}
     .topbar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:10px}
     .lang-switch{display:flex;gap:8px;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:6px}
-    .flag-btn{border:0;background:transparent;cursor:pointer;font-size:clamp(22px, 1.5vw + 16px, 34px);line-height:1;padding:6px 8px;border-radius:999px;opacity:.65;transition:opacity .15s ease, transform .15s ease, background .15s ease}
-    .flag-btn.active{opacity:1;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-    .flag-btn:active{transform:scale(.98)}
+    .flag-btn,.theme-btn{border:0;background:transparent;cursor:pointer;font-size:clamp(22px,1.5vw + 16px,34px);line-height:1;padding:6px 8px;border-radius:999px;opacity:.65;color:var(--fg)}
+    .flag-btn.active,.theme-btn.active{opacity:1;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12)}
     h2{margin:0 0 8px;font-size:var(--h1)}
-    small,.small{color:var(--muted);font-size:var(--small)}
-    .row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
-    textarea,input,select{width:100%;font-size:var(--base);padding:var(--pad);border:1px solid #cfcfcf;border-radius:var(--radius);background:#fff}
-    textarea{min-height:clamp(120px, 16vw, 220px);resize:vertical}
-    button{font-size:var(--base);padding:var(--btnpad-y) var(--btnpad-x);border:0;border-radius:calc(var(--radius) - 4px);cursor:pointer}
-    .btn{background:#111;color:#fff}.btn2{background:#eee;color:#111}
+    .small,small{color:var(--muted);font-size:var(--small)}
     .card{border:1px solid var(--line);border-radius:var(--radius);padding:var(--pad);margin:14px 0;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.03)}
+    .row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+    .grow{flex:1 1 260px}
+    textarea,input,select{width:100%;font-size:var(--base);padding:var(--pad);border:1px solid var(--field-line);border-radius:var(--radius);background:var(--field-bg);color:var(--fg)}
+    textarea{min-height:clamp(120px,16vw,220px);resize:vertical}
+    button{font-size:var(--base);padding:var(--btnpad-y) var(--btnpad-x);border:0;border-radius:calc(var(--radius) - 4px);cursor:pointer}
+    .btn{background:#111;color:#fff}
+    .btn2{background:var(--btn2-bg);color:var(--btn2-fg)}
+    .stack > * + *{margin-top:10px}
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;word-break:break-word}
-    .stack > * + *{margin-top:10px}.grow{flex:1 1 260px}
     .result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
     label span{display:block;margin-bottom:6px}
-    @media (min-width:900px){body{padding:28px}.wrap{max-width:1100px}}
+    .hidden{display:none !important}
+    button:disabled, select:disabled, input:disabled, textarea:disabled{opacity:.65;cursor:not-allowed}
+    #countdown{display:block;margin-top:6px}
+    @media (min-width: 900px){ body{padding:28px} .wrap{max-width:1180px} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="lang-switch" aria-label="Language switcher">
-        <button class="flag-btn active" id="lang-ro" onclick="setLang('ro')" aria-label="Română">🇷🇴</button>
-        <button class="flag-btn" id="lang-en" onclick="setLang('en')" aria-label="English">🇬🇧</button>
-      </div>
-    </div>
-
-    <h2 data-i18n="title">Crypto Note (Offline)</h2>
-    <div class="small" data-i18n="subtitle">Un fișier local. Criptează/decriptează în browser cu AES-256-GCM. Trimite doar „BLOB”-ul.</div>
-
-    <div class="card">
-      <div class="stack">
-        <label>
-          <span data-i18n="input_label">Mesaj (plaintext pentru Encrypt / BLOB pentru Decrypt)</span>
-          <textarea id="input" data-i18n-ph="input_ph" placeholder="Scrie aici mesajul SAU lipește aici BLOB-ul primit..."></textarea>
-        </label>
-
-        <label>
-          <span data-i18n="password_label">Parolă comună (nu o trimite în același canal)</span>
-          <input id="pw" type="password" data-i18n-ph="password_ph" placeholder="Parola comună" autocomplete="new-password" autocapitalize="off" spellcheck="false">
-        </label>
-
-        <div class="row">
-          <button class="btn2" onclick="genPass()" data-i18n="gen_pass">Generează parolă random</button>
-          <button class="btn2" onclick="copyText('pw')" data-i18n="copy_pass">Copy parolă</button>
-          <button class="btn2" onclick="togglePw()" data-i18n="toggle_pass">Afișează/ascunde</button>
-        </div>
-
-        <div class="row">
-          <label class="grow">
-            <span data-i18n="autoclear_label">Auto-ștergere după</span>
-            <select id="ttl">
-              <option value="0" data-i18n="ttl0">Nu șterge automat</option>
-              <option value="15" data-i18n="ttl15">15 secunde</option>
-              <option value="30" selected data-i18n="ttl30">30 secunde</option>
-              <option value="60" data-i18n="ttl60">60 secunde</option>
-              <option value="120" data-i18n="ttl120">2 minute</option>
-            </select>
-          </label>
-          <label class="grow">
-            <span data-i18n="mode_label">Mod</span>
-            <select id="mode">
-              <option value="encrypt" data-i18n="mode_encrypt">Encrypt</option>
-              <option value="decrypt" data-i18n="mode_decrypt">Decrypt</option>
-            </select>
-          </label>
-        </div>
-
-        <div class="row">
-          <button class="btn" onclick="run()" data-i18n="run">Rulează</button>
-          <button class="btn2" onclick="clearAll(true)" data-i18n="clear">Clear</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="result-head">
-        <div><b data-i18n="result_title">Rezultat</b> <span class="small" data-i18n="result_hint">(copiază și trimite)</span></div>
-        <button class="btn2" onclick="copyResult()" data-i18n="copy_result">Copy rezultat</button>
-      </div>
-      <textarea id="output" class="mono" data-i18n-ph="output_ph" placeholder="Aici apare BLOB-ul criptat sau mesajul decriptat..." readonly></textarea>
-      <small id="status"></small>
+<div class="wrap">
+  <div class="topbar">
+    <div class="lang-switch" aria-label="Language and theme switcher">
+      <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+      <button class="flag-btn active" id="lang-ro" onclick="setLang('ro')" aria-label="Română">🇷🇴</button>
+      <button class="flag-btn" id="lang-en" onclick="setLang('en')" aria-label="English">🇬🇧</button>
     </div>
   </div>
+
+  <h2 data-i18n="title">Crypto Note Files Compact</h2>
+  <div class="small" data-i18n="subtitle">Criptează/decriptează text și fișiere, local în browser. Dacă există atât text, cât și fișier, sunt puse în același pachet criptat.</div>
+
+  <div class="card">
+    <div class="stack">
+      <div class="row">
+        <label class="grow">
+          <span data-i18n="mode_label">Mod</span>
+          <select id="mode" onchange="updateUI()">
+            <option value="encrypt" data-i18n="mode_encrypt">Encrypt</option>
+            <option value="decrypt" data-i18n="mode_decrypt">Decrypt</option>
+          </select>
+        </label>
+        <label class="grow">
+          <span data-i18n="autoclear_label">Auto-ștergere după</span>
+          <select id="ttl">
+            <option value="0" data-i18n="ttl0">Nu șterge automat</option>
+            <option value="15" data-i18n="ttl15">15 secunde</option>
+            <option value="30" selected data-i18n="ttl30">30 secunde</option>
+            <option value="60" data-i18n="ttl60">60 secunde</option>
+            <option value="120" data-i18n="ttl120">2 minute</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        <span data-i18n="password_label">Cod / parolă comună</span>
+        <input id="pw" type="password" data-i18n-ph="password_ph" placeholder="Introdu codul comun" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </label>
+
+      <div class="row">
+        <button class="btn2 mode-encrypt-only" onclick="genPass()" data-i18n="gen_pass">Generează cod random</button>
+        <button class="btn2 mode-encrypt-only" onclick="copyText('pw')" data-i18n="copy_pass">Copy cod</button>
+        <button class="btn2 mode-decrypt-only hidden" onclick="pastePassword()" data-i18n="paste_pass">Lipește codul din clipboard</button>
+        <button class="btn2" onclick="togglePw()" data-i18n="toggle_pass">Afișează/ascunde</button>
+      </div>
+
+      <div id="encryptInputWrap">
+        <label>
+          <span data-i18n="text_label">Text</span>
+          <textarea id="textInput" data-i18n-ph="text_ph" placeholder="Scrie aici textul..."></textarea>
+        </label>
+        <label>
+          <span data-i18n="file_label">Sau alege un fișier</span>
+          <input id="fileInput" type="file">
+        </label>
+        <div class="small" id="fileMeta"></div>
+      </div>
+
+      <div id="decryptInputWrap" class="hidden">
+        <label>
+          <span data-i18n="decrypt_blob_label">BLOB criptat (pentru text)</span>
+          <textarea id="decryptBlobInput" class="mono" data-i18n-ph="decrypt_blob_ph" placeholder="Lipește aici BLOB-ul primit..."></textarea>
+        </label>
+        <div class="row">
+          <button class="btn2" onclick="pasteDecryptBlob()" data-i18n="paste_blob">Lipește BLOB-ul din clipboard</button>
+        </div>
+        <label>
+          <span data-i18n="decrypt_file_label">Sau alege pachetul criptat (pentru fișier sau text+fișier)</span>
+          <input id="encryptedPackageInput" type="file" onchange="loadEncryptedPackageFile()">
+        </label>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="runBtn" onclick="run()" data-i18n="run">Rulează</button>
+        <button class="btn2" onclick="clearAll()" data-i18n="clear">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="result-head">
+      <div><b data-i18n="result_title">Rezultat</b> <span class="small" data-i18n="result_hint">(copiază, trimite sau descarcă)</span></div>
+      <div class="row" style="margin:0">
+        <button class="btn2" onclick="copyResult()" id="copyResultBtn" data-i18n="copy_result">Copy rezultat</button>
+        <button class="btn2" id="downloadPackageBtn" onclick="downloadEncryptedPackage()" disabled data-i18n="download_package">Descarcă pachet criptat</button>
+        <button class="btn2 hidden" id="downloadDecryptedBtn" onclick="downloadDecryptedFile()" data-i18n="download_decrypted">Descarcă fișierul decriptat</button>
+        <button class="btn2 hidden" id="downloadTextBtn" onclick="downloadDecryptedText()" data-i18n="download_text">Descarcă textul (.txt)</button>
+      </div>
+    </div>
+    <textarea id="output" class="mono" data-i18n-ph="output_ph" placeholder="Aici apare rezultatul..." readonly></textarea>
+    <div id="decryptedFileInfo" class="small hidden"></div>
+    <div id="previewWrap" class="hidden">
+      <div class="small" id="previewLabel"></div>
+      <div id="previewBox" style="margin-top:10px"></div>
+    </div>
+    <small id="status"></small>
+    <small id="countdown"></small>
+  </div>
+</div>
 
 <script>
   const i18n = {
     ro: {
-      title: "Crypto Note (Offline)",
-      subtitle: "Un fișier local. Criptează/decriptează în browser cu AES-256-GCM. Trimite doar „BLOB”-ul.",
-      input_label: "Mesaj (plaintext pentru Encrypt / BLOB pentru Decrypt)",
-      input_ph: "Scrie aici mesajul SAU lipește aici BLOB-ul primit...",
-      password_label: "Parolă comună (nu o trimite în același canal)",
-      password_ph: "Parola comună",
-      gen_pass: "Generează parolă random",
-      copy_pass: "Copy parolă",
-      toggle_pass: "Afișează/ascunde",
+      title: "Crypto Note Files Compact",
+      subtitle: "Criptează/decriptează text și fișiere, local în browser. Dacă există atât text, cât și fișier, sunt puse în același pachet criptat.",
+      mode_label: "Mod",
+      mode_encrypt: "Encrypt",
+      mode_decrypt: "Decrypt",
       autoclear_label: "Auto-ștergere după",
       ttl0: "Nu șterge automat",
       ttl15: "15 secunde",
       ttl30: "30 secunde",
       ttl60: "60 secunde",
       ttl120: "2 minute",
-      mode_label: "Mod",
-      mode_encrypt: "Encrypt",
-      mode_decrypt: "Decrypt",
+      password_label: "Cod / parolă comună",
+      password_ph: "Introdu codul comun",
+      gen_pass: "Generează cod random",
+      copy_pass: "Copy cod",
+      paste_pass: "Lipește codul din clipboard",
+      paste_blob: "Lipește BLOB-ul din clipboard",
+      toggle_pass: "Afișează/ascunde",
+      text_label: "Text",
+      text_ph: "Scrie aici textul...",
+      file_label: "Sau alege un fișier",
+      decrypt_blob_label: "BLOB criptat (pentru text)",
+      decrypt_blob_ph: "Lipește aici BLOB-ul primit...",
+      decrypt_file_label: "Sau alege pachetul criptat (pentru fișier sau text+fișier)",
       run: "Rulează",
       clear: "Clear",
       result_title: "Rezultat",
-      result_hint: "(copiază și trimite)",
+      result_hint: "(copiază, trimite sau descarcă)",
       copy_result: "Copy rezultat",
-      output_ph: "Aici apare BLOB-ul criptat sau mesajul decriptat...",
+      download_package: "Descarcă pachet criptat",
+      download_decrypted: "Descarcă fișierul decriptat",
+      download_text: "Descarcă textul (.txt)",
+      output_ph: "Aici apare rezultatul...",
       status_copied: "Copiat.",
       status_result_copied: "Rezultat copiat.",
-      status_generated: "Parolă random generată.",
-      status_cleared: "Curățat.",
-      status_autoclear_in: (ttl) => `Auto-clear în ${ttl}s.`,
-      status_autoclear_off: "Auto-clear dezactivat.",
-      status_autoclear_done: "Auto-clear făcut.",
-      err_need_password: "Scrie o parolă (sau apasă Generează parolă).",
-      err_need_input: "Scrie un mesaj sau lipește un BLOB.",
-      status_encrypted: "Criptat. Copiază BLOB-ul și trimite-l.",
-      status_decrypted: "Decriptat.",
-      status_decrypt_fail: "Parolă greșită sau text criptat corupt."
+      status_generated: "Cod random generat.",
+      status_cleared: "Totul a fost șters.",
+      status_autoclear_in: (ttl) => `Se șterge automat în ${ttl}s.`,
+      status_autoclear_off: "Auto-ștergerea este dezactivată.",
+      status_autoclear_done: "Totul a fost șters automat.",
+      err_need_password: "Introdu codul comun (sau apasă Generează cod random).",
+      err_need_encrypt_input: "Scrie text sau alege un fișier.",
+      err_need_decrypt_input: "Lipește un BLOB criptat sau alege un pachet criptat.",
+      status_encrypted_text: "Text criptat.",
+      status_encrypted_file: "Fișier criptat.",
+      status_encrypted_combo: "Textul și fișierul au fost criptate în același pachet.",
+      status_decrypted_text: "Text decriptat.",
+      status_decrypted_file: "Fișier decriptat.",
+      status_decrypted_combo: "Textul și fișierul au fost decriptate.",
+      status_decrypt_fail: "Cod greșit sau pachet corupt.",
+      file_selected: (name, size, type) => `Fișier selectat: ${name} • ${formatBytes(size)} • ${type || "tip necunoscut"}`,
+      decrypted_file_info: (name, size, type) => `Fișier decriptat: ${name} • ${formatBytes(size)} • ${type || "tip necunoscut"}`,
+      package_loaded: "Pachetul criptat a fost încărcat din fișier.",
+      status_pasted_password: "Codul a fost lipit din clipboard.",
+      status_pasted_blob: "BLOB-ul a fost lipit din clipboard.",
+      status_paste_failed: "Nu am putut citi clipboard-ul.",
+      status_copy_failed: "Nu am putut copia în clipboard.",
+      paste_prompt_password: "Clipboard-ul nu poate fi citit direct aici. Lipește codul în fereastra asta:",
+      paste_prompt_blob: "Clipboard-ul nu poate fi citit direct aici. Lipește BLOB-ul în fereastra asta:",
+      preview_label: "Preview fișier decriptat",
+      countdown_in: (sec) => `Se șterge automat în ${sec}s.`,
+      theme_auto_dark: "Mod noapte automat",
+      theme_auto_light: "Mod zi automat",
+      theme_manual_dark: "Mod noapte manual",
+      theme_manual_light: "Mod zi manual"
     },
     en: {
-      title: "Crypto Note (Offline)",
-      subtitle: "A local file. Encrypts/decrypts in the browser with AES-256-GCM. Send only the “BLOB”.",
-      input_label: "Message (plaintext for Encrypt / BLOB for Decrypt)",
-      input_ph: "Write the message here OR paste the received BLOB here...",
-      password_label: "Shared password (do not send it in the same channel)",
-      password_ph: "Shared password",
-      gen_pass: "Generate random password",
-      copy_pass: "Copy password",
-      toggle_pass: "Show/hide",
+      title: "Crypto Note Files Compact",
+      subtitle: "Encrypts/decrypts text and files locally in the browser. If both text and a file are present, they are packed into the same encrypted package.",
+      mode_label: "Mode",
+      mode_encrypt: "Encrypt",
+      mode_decrypt: "Decrypt",
       autoclear_label: "Auto-clear after",
       ttl0: "Do not auto-clear",
       ttl15: "15 seconds",
       ttl30: "30 seconds",
       ttl60: "60 seconds",
       ttl120: "2 minutes",
-      mode_label: "Mode",
-      mode_encrypt: "Encrypt",
-      mode_decrypt: "Decrypt",
+      password_label: "Shared code / password",
+      password_ph: "Enter the shared code",
+      gen_pass: "Generate random code",
+      copy_pass: "Copy code",
+      paste_pass: "Paste code from clipboard",
+      paste_blob: "Paste BLOB from clipboard",
+      toggle_pass: "Show/hide",
+      text_label: "Text",
+      text_ph: "Write the text here...",
+      file_label: "Or choose a file",
+      decrypt_blob_label: "Encrypted BLOB (for text)",
+      decrypt_blob_ph: "Paste the received BLOB here...",
+      decrypt_file_label: "Or choose the encrypted package (for file or text+file)",
       run: "Run",
       clear: "Clear",
       result_title: "Result",
-      result_hint: "(copy and send)",
+      result_hint: "(copy, send or download)",
       copy_result: "Copy result",
-      output_ph: "The encrypted BLOB or decrypted message appears here...",
+      download_package: "Download encrypted package",
+      download_decrypted: "Download decrypted file",
+      download_text: "Download text (.txt)",
+      output_ph: "The result appears here...",
       status_copied: "Copied.",
       status_result_copied: "Result copied.",
-      status_generated: "Random password generated.",
-      status_cleared: "Cleared.",
+      status_generated: "Random code generated.",
+      status_cleared: "Everything was cleared.",
       status_autoclear_in: (ttl) => `Auto-clear in ${ttl}s.`,
-      status_autoclear_off: "Auto-clear disabled.",
-      status_autoclear_done: "Auto-clear completed.",
-      err_need_password: "Enter a password (or press Generate random password).",
-      err_need_input: "Write a message or paste a BLOB.",
-      status_encrypted: "Encrypted. Copy the BLOB and send it.",
-      status_decrypted: "Decrypted.",
-      status_decrypt_fail: "Wrong password or corrupted encrypted text."
+      status_autoclear_off: "Auto-clear is disabled.",
+      status_autoclear_done: "Everything was cleared automatically.",
+      err_need_password: "Enter the shared code (or press Generate random code).",
+      err_need_encrypt_input: "Write text or choose a file.",
+      err_need_decrypt_input: "Paste an encrypted BLOB or choose an encrypted package.",
+      status_encrypted_text: "Text encrypted.",
+      status_encrypted_file: "File encrypted.",
+      status_encrypted_combo: "Text and file were encrypted into the same package.",
+      status_decrypted_text: "Text decrypted.",
+      status_decrypted_file: "File decrypted.",
+      status_decrypted_combo: "Text and file were decrypted.",
+      status_decrypt_fail: "Wrong code or corrupted package.",
+      file_selected: (name, size, type) => `Selected file: ${name} • ${formatBytes(size)} • ${type || "unknown type"}`,
+      decrypted_file_info: (name, size, type) => `Decrypted file: ${name} • ${formatBytes(size)} • ${type || "unknown type"}`,
+      package_loaded: "Encrypted package loaded from file.",
+      status_pasted_password: "Code pasted from clipboard.",
+      status_pasted_blob: "BLOB pasted from clipboard.",
+      status_paste_failed: "Could not read the clipboard.",
+      status_copy_failed: "Could not copy to the clipboard.",
+      paste_prompt_password: "Clipboard cannot be read directly here. Paste the code into this prompt:",
+      paste_prompt_blob: "Clipboard cannot be read directly here. Paste the BLOB into this prompt:",
+      preview_label: "Decrypted file preview",
+      countdown_in: (sec) => `Auto-clear in ${sec}s.`,
+      theme_auto_dark: "Auto dark mode",
+      theme_auto_light: "Auto light mode",
+      theme_manual_dark: "Manual dark mode",
+      theme_manual_light: "Manual light mode"
     }
   };
 
   let currentLang = "ro";
   const enc = new TextEncoder();
   const dec = new TextDecoder();
-  let clearTimer = null;
+  let encryptedPackageBlob = null;
+  let decryptedFileBlob = null;
+  let decryptedFileName = "";
+  let decryptedText = "";
+  let previewUrl = null;
+
+  const state = {
+    busy: false,
+    opId: 0,
+    deadline: null,
+    autoClearTimeout: null,
+    countdownInterval: null
+  };
 
   function t(key, ...args){
     const val = i18n[currentLang][key];
@@ -197,25 +325,268 @@
     document.documentElement.lang = lang;
     document.getElementById("lang-ro").classList.toggle("active", lang === "ro");
     document.getElementById("lang-en").classList.toggle("active", lang === "en");
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-      const key = el.getAttribute("data-i18n");
-      el.textContent = t(key);
-    });
-    document.querySelectorAll("[data-i18n-ph]").forEach(el => {
-      const key = el.getAttribute("data-i18n-ph");
-      el.placeholder = t(key);
-    });
+    document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.getAttribute("data-i18n")));
+    document.querySelectorAll("[data-i18n-ph]").forEach(el => el.placeholder = t(el.getAttribute("data-i18n-ph")));
+    refreshFileMeta();
+    applyTheme();
   }
 
   function setStatus(msg){ document.getElementById("status").textContent = msg; }
 
-  function b64e(bytes){
-    let bin = "";
-    bytes.forEach(b => bin += String.fromCharCode(b));
-    return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  function setCountdown(msg){
+    document.getElementById("countdown").textContent = msg || "";
   }
 
-  function b64d(str){
+  function updateBusyUI(){
+    const busy = state.busy;
+    const runBtn = document.getElementById("runBtn");
+    const mode = document.getElementById("mode");
+    if(runBtn) runBtn.disabled = busy;
+    if(mode) mode.disabled = busy;
+  }
+
+  function stopAutoClearRuntime(){
+    if(state.autoClearTimeout){
+      clearTimeout(state.autoClearTimeout);
+      state.autoClearTimeout = null;
+    }
+    if(state.countdownInterval){
+      clearInterval(state.countdownInterval);
+      state.countdownInterval = null;
+    }
+  }
+
+  function clearAutoClear(){
+    stopAutoClearRuntime();
+    state.deadline = null;
+    setCountdown("");
+  }
+
+  function updateCountdownDisplay(){
+    if(!state.deadline){
+      setCountdown("");
+      return;
+    }
+    const remainingMs = state.deadline - Date.now();
+    if(remainingMs <= 0){
+      setCountdown(t("countdown_in", 0));
+      return;
+    }
+    const seconds = Math.max(0, Math.ceil(remainingMs / 1000));
+    setCountdown(t("countdown_in", seconds));
+  }
+
+  function suspendAutoClear(){
+    stopAutoClearRuntime();
+  }
+
+  function resumeAutoClear(){
+    if(!state.deadline) return;
+    const remainingMs = state.deadline - Date.now();
+    if(remainingMs <= 0){
+      clearAll(true);
+      setStatus(t("status_autoclear_done"));
+      return;
+    }
+
+    stopAutoClearRuntime();
+    state.autoClearTimeout = setTimeout(() => {
+      clearAll(true);
+      setStatus(t("status_autoclear_done"));
+    }, remainingMs);
+
+    state.countdownInterval = setInterval(() => {
+      if(!state.deadline){
+        stopAutoClearRuntime();
+        setCountdown("");
+        return;
+      }
+      const ms = state.deadline - Date.now();
+      if(ms <= 0){
+        clearAll(true);
+        setStatus(t("status_autoclear_done"));
+        return;
+      }
+      updateCountdownDisplay();
+    }, 250);
+
+    updateCountdownDisplay();
+  }
+
+  let themeMode = "auto";
+
+  function applyTheme(){
+    const root = document.documentElement;
+    if(themeMode === "auto"){
+      root.removeAttribute("data-theme");
+      const isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      updateThemeButton(isDark, true);
+    } else {
+      root.setAttribute("data-theme", themeMode);
+      updateThemeButton(themeMode === "dark", false);
+    }
+  }
+
+  function updateThemeButton(isDark, isAuto){
+    const btn = document.getElementById("theme-toggle");
+    btn.textContent = isDark ? "☀️" : "🌙";
+    btn.classList.toggle("active", true);
+    btn.setAttribute("aria-label", isDark ? "Toggle light mode" : "Toggle dark mode");
+    if(isAuto){
+      btn.title = isDark ? t("theme_auto_dark") : t("theme_auto_light");
+    } else {
+      btn.title = isDark ? t("theme_manual_dark") : t("theme_manual_light");
+    }
+  }
+
+  function toggleTheme(){
+    if(themeMode === "auto"){
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      themeMode = prefersDark ? "light" : "dark";
+    } else if(themeMode === "dark"){
+      themeMode = "light";
+    } else {
+      themeMode = "dark";
+    }
+    applyTheme();
+  }
+
+  if(window.matchMedia){
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    if(media.addEventListener){
+      media.addEventListener("change", () => { if(themeMode === "auto") applyTheme(); });
+    } else if(media.addListener){
+      media.addListener(() => { if(themeMode === "auto") applyTheme(); });
+    }
+  }
+
+  function clearPreview(){
+    const wrap = document.getElementById("previewWrap");
+    const box = document.getElementById("previewBox");
+    const label = document.getElementById("previewLabel");
+    if(previewUrl){
+      try { URL.revokeObjectURL(previewUrl); } catch(e){}
+      previewUrl = null;
+    }
+    wrap.classList.add("hidden");
+    box.innerHTML = "";
+    label.textContent = "";
+  }
+
+  function showPreview(blob, mime, textContent){
+    clearPreview();
+    const wrap = document.getElementById("previewWrap");
+    const box = document.getElementById("previewBox");
+    const label = document.getElementById("previewLabel");
+    label.textContent = t("preview_label");
+
+    const safeMime = (mime || "").toLowerCase();
+
+    if(textContent != null && (safeMime.startsWith("text/") || safeMime === "")){
+      const pre = document.createElement("pre");
+      pre.textContent = textContent;
+      pre.style.whiteSpace = "pre-wrap";
+      pre.style.wordBreak = "break-word";
+      pre.style.margin = "0";
+      pre.style.padding = "12px";
+      pre.style.border = "1px solid var(--line)";
+      pre.style.borderRadius = "12px";
+      pre.style.background = "var(--field-bg)";
+      pre.style.color = "var(--fg)";
+      pre.style.maxHeight = "360px";
+      pre.style.overflow = "auto";
+      box.appendChild(pre);
+      wrap.classList.remove("hidden");
+      return;
+    }
+
+    previewUrl = URL.createObjectURL(blob);
+
+    if(safeMime.startsWith("image/")){
+      const img = document.createElement("img");
+      img.src = previewUrl;
+      img.alt = "preview";
+      img.style.maxWidth = "100%";
+      img.style.height = "auto";
+      img.style.display = "block";
+      img.style.border = "1px solid var(--line)";
+      img.style.borderRadius = "12px";
+      box.appendChild(img);
+      wrap.classList.remove("hidden");
+      return;
+    }
+
+    if(safeMime === "application/pdf"){
+      const frame = document.createElement("iframe");
+      frame.src = previewUrl;
+      frame.style.width = "100%";
+      frame.style.height = "500px";
+      frame.style.border = "1px solid var(--line)";
+      frame.style.borderRadius = "12px";
+      box.appendChild(frame);
+      wrap.classList.remove("hidden");
+      return;
+    }
+
+    if(safeMime.startsWith("audio/")){
+      const audio = document.createElement("audio");
+      audio.src = previewUrl;
+      audio.controls = true;
+      audio.style.width = "100%";
+      box.appendChild(audio);
+      wrap.classList.remove("hidden");
+      return;
+    }
+
+    if(safeMime.startsWith("video/")){
+      const video = document.createElement("video");
+      video.src = previewUrl;
+      video.controls = true;
+      video.style.width = "100%";
+      video.style.maxHeight = "420px";
+      video.style.border = "1px solid var(--line)";
+      video.style.borderRadius = "12px";
+      box.appendChild(video);
+      wrap.classList.remove("hidden");
+      return;
+    }
+  }
+
+  function updateUI(){
+    const mode = document.getElementById("mode").value;
+    document.getElementById("encryptInputWrap").classList.toggle("hidden", mode !== "encrypt");
+    document.getElementById("decryptInputWrap").classList.toggle("hidden", mode !== "decrypt");
+    document.querySelectorAll(".mode-encrypt-only").forEach(el => el.classList.toggle("hidden", mode !== "encrypt"));
+    document.querySelectorAll(".mode-decrypt-only").forEach(el => el.classList.toggle("hidden", mode !== "decrypt"));
+    document.getElementById("downloadPackageBtn").classList.toggle("hidden", mode !== "encrypt");
+    document.getElementById("copyResultBtn").disabled = false;
+  }
+
+  function formatBytes(bytes){
+    if(bytes < 1024) return bytes + " B";
+    const units = ["KB","MB","GB"];
+    let val = bytes / 1024, i = 0;
+    while(val >= 1024 && i < units.length - 1){ val /= 1024; i++; }
+    return val.toFixed(val < 10 ? 1 : 0) + " " + units[i];
+  }
+
+  function refreshFileMeta(){
+    const f = document.getElementById("fileInput").files[0];
+    document.getElementById("fileMeta").textContent = f ? t("file_selected", f.name, f.size, f.type) : "";
+  }
+
+  document.addEventListener("change", (e) => {
+    if(e.target && e.target.id === "fileInput") refreshFileMeta();
+  });
+
+  function b64uEncode(bytes){
+    let bin = "";
+    bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""
+    );
+  }
+
+  function b64uDecode(str){
     str = str.replace(/-/g,"+").replace(/_/g,"/");
     const pad = "===".slice((str.length + 3) % 4);
     const bin = atob(str + pad);
@@ -230,66 +601,144 @@
     return a;
   }
 
+  function concatBytes(){
+    const arrays = Array.from(arguments);
+    const total = arrays.reduce((s,a) => s + a.length, 0);
+    const out = new Uint8Array(total);
+    let pos = 0;
+    for(const arr of arrays){ out.set(arr, pos); pos += arr.length; }
+    return out;
+  }
+
+  function u16be(n){ return new Uint8Array([(n >> 8) & 255, n & 255]); }
+  function u32be(n){ return new Uint8Array([(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255]); }
+  function readU16be(bytes, off){ return (bytes[off] << 8) | bytes[off+1]; }
+  function readU32be(bytes, off){ return ((bytes[off] * 16777216) + (bytes[off+1] << 16) + (bytes[off+2] << 8) + bytes[off+3]) >>> 0; }
+
+  async function gzipCompress(bytes){
+    if(typeof CompressionStream === "undefined") return bytes;
+    const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream("gzip"));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+
+  async function gzipDecompress(bytes){
+    if(typeof DecompressionStream === "undefined") return bytes;
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+
   function scheduleAutoClear(){
-    const ttl = parseInt(document.getElementById("ttl").value,10);
-    if(clearTimer){ clearTimeout(clearTimer); clearTimer = null; }
+    const ttl = parseInt(document.getElementById("ttl").value, 10);
     if(ttl > 0){
-      clearTimer = setTimeout(() => {
-        clearAll(false);
-        setStatus(t("status_autoclear_done"));
-      }, ttl * 1000);
-      setStatus(t("status_autoclear_in", ttl));
+      state.deadline = Date.now() + ttl * 1000;
+      resumeAutoClear();
     } else {
-      setStatus(t("status_autoclear_off"));
+      clearAutoClear();
     }
   }
 
-  function clearAll(showStatus = true){
-    document.getElementById("input").value = "";
+  function clearAll(fromAuto){
+    state.opId += 1;
+    state.busy = false;
+    updateBusyUI();
+    clearAutoClear();
+
+    document.getElementById("textInput").value = "";
+    document.getElementById("decryptBlobInput").value = "";
     document.getElementById("output").value = "";
     document.getElementById("pw").value = "";
-    document.getElementById("pw").type = "password";
-    if(showStatus){
-      setStatus(t("status_cleared"));
-    }
-    if(clearTimer){ clearTimeout(clearTimer); clearTimer = null; }
+    document.getElementById("fileInput").value = "";
+    document.getElementById("encryptedPackageInput").value = "";
+    document.getElementById("fileMeta").textContent = "";
+    document.getElementById("decryptedFileInfo").classList.add("hidden");
+    document.getElementById("decryptedFileInfo").textContent = "";
+    document.getElementById("downloadPackageBtn").disabled = true;
+    document.getElementById("downloadDecryptedBtn").classList.add("hidden");
+    document.getElementById("downloadTextBtn").classList.add("hidden");
+    document.getElementById("copyResultBtn").disabled = false;
+
+    encryptedPackageBlob = null;
+    decryptedFileBlob = null;
+    decryptedFileName = "";
+    decryptedText = "";
+    clearPreview();
+
+    if(!fromAuto) setStatus(t("status_cleared"));
   }
 
   async function copyToClipboard(text){
     try{
-      if (navigator.clipboard && navigator.clipboard.writeText) {
+      if(navigator.clipboard && navigator.clipboard.writeText){
         await navigator.clipboard.writeText(text);
         return true;
       }
+    } catch(e){}
+    try{
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "-9999px";
+      ta.style.left = "-9999px";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return !!ok;
     } catch(e){}
     return false;
   }
 
   async function copyText(id){
     const el = document.getElementById(id);
-    const ok = await copyToClipboard(el.value);
-    if(!ok){
-      el.select();
-      el.setSelectionRange(0, 999999);
-      document.execCommand("copy");
-    }
-    setStatus(t("status_copied"));
+    const ok = await copyToClipboard(el.value || "");
+    setStatus(t(ok ? "status_copied" : "status_copy_failed"));
   }
 
   async function copyResult(){
     const el = document.getElementById("output");
-    const ok = await copyToClipboard(el.value);
-    if(!ok){
-      el.select();
-      el.setSelectionRange(0, 999999);
-      document.execCommand("copy");
+    const ok = await copyToClipboard(el.value || "");
+    setStatus(t(ok ? "status_result_copied" : "status_copy_failed"));
+  }
+
+  async function readClipboardTextOrPrompt(promptKey){
+    try{
+      if(window.isSecureContext && navigator.clipboard && navigator.clipboard.readText){
+        const txt = await navigator.clipboard.readText();
+        if(typeof txt === "string") return txt;
+      }
+    } catch(e){}
+    const manual = window.prompt(t(promptKey), "");
+    if(manual === null) throw new Error("paste-cancelled");
+    return manual;
+  }
+
+  async function pastePassword(){
+    try{
+      const txt = await readClipboardTextOrPrompt("paste_prompt_password");
+      document.getElementById("pw").value = txt || "";
+      setStatus(t("status_pasted_password"));
+    } catch(e){
+      if((e && e.message) !== "paste-cancelled") setStatus(t("status_paste_failed"));
     }
-    setStatus(t("status_result_copied"));
+  }
+
+  async function pasteDecryptBlob(){
+    try{
+      const txt = await readClipboardTextOrPrompt("paste_prompt_blob");
+      document.getElementById("decryptBlobInput").value = txt || "";
+      setStatus(t("status_pasted_blob"));
+    } catch(e){
+      if((e && e.message) !== "paste-cancelled") setStatus(t("status_paste_failed"));
+    }
   }
 
   function togglePw(){
     const pw = document.getElementById("pw");
-    pw.type = (pw.type === "password") ? "text" : "password";
+    pw.type = pw.type === "password" ? "text" : "password";
   }
 
   function genPass(){
@@ -315,60 +764,324 @@
     );
   }
 
-  async function encryptMessage(password, plaintext){
+  async function encryptTextCompact(password, text){
+    let payload = enc.encode(text);
+    let compressed = 0;
+    const compressedPayload = await gzipCompress(payload);
+    if(compressedPayload.length < payload.length){
+      payload = compressedPayload;
+      compressed = 1;
+    }
     const salt = randBytes(16);
     const iv = randBytes(12);
     const key = await deriveKey(password, salt);
-    const ct = new Uint8Array(await crypto.subtle.encrypt(
-      {name:"AES-GCM", iv},
-      key,
-      enc.encode(plaintext)
-    ));
-    return "v1." + b64e(salt) + "." + b64e(iv) + "." + b64e(ct);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, payload));
+    const body = concatBytes(new Uint8Array([1, compressed]), salt, iv, ct);
+    return "ct2." + b64uEncode(body);
   }
 
-  async function decryptMessage(password, blob){
-    if(!blob.startsWith("v1.")) throw new Error("invalid blob");
-    const parts = blob.split(".");
-    if(parts.length !== 4) throw new Error("invalid blob");
-    const salt = b64d(parts[1]);
-    const iv = b64d(parts[2]);
-    const ct = b64d(parts[3]);
+  async function decryptTextCompact(password, blobStr){
+    if(!blobStr.startsWith("ct2.")) throw new Error("invalid text blob");
+    const body = b64uDecode(blobStr.slice(4));
+    if(body.length < 30) throw new Error("invalid text blob");
+    const version = body[0];
+    const compressed = body[1];
+    if(version !== 1) throw new Error("invalid version");
+    const salt = body.slice(2, 18);
+    const iv = body.slice(18, 30);
+    const ct = body.slice(30);
     const key = await deriveKey(password, salt);
-    const ptBuf = await crypto.subtle.decrypt(
-      {name:"AES-GCM", iv},
-      key,
-      ct
+    let pt = new Uint8Array(await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, ct));
+    if(compressed) pt = await gzipDecompress(pt);
+    return dec.decode(pt);
+  }
+
+  async function encryptCombinedPackage(password, text, file){
+    let flags = 0;
+    let textBytes = new Uint8Array(0);
+    let nameBytes = new Uint8Array(0);
+    let mimeBytes = new Uint8Array(0);
+    let fileBytes = new Uint8Array(0);
+
+    if(text){
+      flags |= 1;
+      textBytes = enc.encode(text);
+      const compressedText = await gzipCompress(textBytes);
+      if(compressedText.length < textBytes.length){
+        textBytes = compressedText;
+        flags |= 4;
+      }
+    }
+
+    if(file){
+      flags |= 2;
+      nameBytes = enc.encode(file.name || "file");
+      mimeBytes = enc.encode(file.type || "application/octet-stream");
+      fileBytes = new Uint8Array(await file.arrayBuffer());
+    }
+
+    const header = concatBytes(
+      new Uint8Array([1]),
+      new Uint8Array([flags]),
+      u32be(textBytes.length),
+      u16be(nameBytes.length),
+      u16be(mimeBytes.length),
+      u32be(fileBytes.length),
+      nameBytes,
+      mimeBytes,
+      textBytes,
+      fileBytes
     );
-    return dec.decode(ptBuf);
+
+    const salt = randBytes(16);
+    const iv = randBytes(12);
+    const key = await deriveKey(password, salt);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, header));
+    return concatBytes(new Uint8Array([2, 1]), salt, iv, ct);
+  }
+
+  async function decryptCombinedPackage(password, packedBytes){
+    if(packedBytes.length < 30) throw new Error("invalid file package");
+    const version = packedBytes[0];
+    const kind = packedBytes[1];
+    if(version !== 2 || kind !== 1) throw new Error("invalid file package");
+    const salt = packedBytes.slice(2, 18);
+    const iv = packedBytes.slice(18, 30);
+    const ct = packedBytes.slice(30);
+    const key = await deriveKey(password, salt);
+    const plaintext = new Uint8Array(await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, ct));
+
+    if(plaintext.length < 14) throw new Error("invalid package payload");
+    const innerVersion = plaintext[0];
+    const flags = plaintext[1];
+    if(innerVersion !== 1) throw new Error("invalid package payload");
+
+    const textLen = readU32be(plaintext, 2);
+    const nameLen = readU16be(plaintext, 6);
+    const mimeLen = readU16be(plaintext, 8);
+    const fileLen = readU32be(plaintext, 10);
+
+    const metaStart = 14;
+    const nameStart = metaStart;
+    const mimeStart = nameStart + nameLen;
+    const textStart = mimeStart + mimeLen;
+    const fileStart = textStart + textLen;
+    const end = fileStart + fileLen;
+    if(plaintext.length < end) throw new Error("invalid package payload");
+
+    let resultText = "";
+    let resultFile = null;
+
+    if(flags & 1){
+      let txtBytes = plaintext.slice(textStart, textStart + textLen);
+      if(flags & 4) txtBytes = await gzipDecompress(txtBytes);
+      resultText = dec.decode(txtBytes);
+    }
+
+    if(flags & 2){
+      const name = dec.decode(plaintext.slice(nameStart, nameStart + nameLen));
+      const mime = dec.decode(plaintext.slice(mimeStart, mimeStart + mimeLen));
+      const fileBytes = plaintext.slice(fileStart, fileStart + fileLen);
+      resultFile = { name, mime, fileBytes };
+    }
+
+    return { text: resultText, file: resultFile };
+  }
+
+  function setEncryptedPackage(packedBytes, suggestedName){
+    encryptedPackageBlob = new Blob([packedBytes], {type:"application/octet-stream"});
+    encryptedPackageBlob._name = suggestedName || "encrypted-package.cryptonote";
+    document.getElementById("output").value = "[" + encryptedPackageBlob._name + "]";
+    document.getElementById("downloadPackageBtn").disabled = false;
+    document.getElementById("copyResultBtn").disabled = true;
+  }
+
+  function downloadEncryptedPackage(){
+    if(!encryptedPackageBlob) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(encryptedPackageBlob);
+    a.download = encryptedPackageBlob._name || "encrypted-package.cryptonote";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  }
+
+  function downloadDecryptedFile(){
+    if(!decryptedFileBlob) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(decryptedFileBlob);
+    a.download = decryptedFileName || "decrypted-file";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  }
+
+  function downloadDecryptedText(){
+    if(!decryptedText) return;
+    const blob = new Blob([decryptedText], {type:"text/plain;charset=utf-8"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = decryptedFileName ? (decryptedFileName + ".txt") : "decrypted-text.txt";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  }
+
+  async function loadEncryptedPackageFile(){
+    const f = document.getElementById("encryptedPackageInput").files[0];
+    if(!f) return;
+    setStatus(t("package_loaded"));
   }
 
   async function run(){
+    if(state.busy) return;
+
+    const mode = document.getElementById("mode").value;
+    const pw = document.getElementById("pw").value;
+    if(!pw){
+      setStatus(t("err_need_password"));
+      return;
+    }
+
+    state.busy = true;
+    updateBusyUI();
+    state.opId += 1;
+    const myOp = state.opId;
+
     try{
-      const mode = document.getElementById("mode").value;
-      const input = document.getElementById("input").value.trim();
-      const pw = document.getElementById("pw").value;
-      if(!pw){ setStatus(t("err_need_password")); return; }
-      if(!input){ setStatus(t("err_need_input")); return; }
+      document.getElementById("decryptedFileInfo").classList.add("hidden");
+      document.getElementById("decryptedFileInfo").textContent = "";
+      document.getElementById("downloadDecryptedBtn").classList.add("hidden");
+      document.getElementById("downloadTextBtn").classList.add("hidden");
+      decryptedFileBlob = null;
+      decryptedFileName = "";
+      decryptedText = "";
+      clearPreview();
+      encryptedPackageBlob = null;
+      document.getElementById("downloadPackageBtn").disabled = true;
+      document.getElementById("copyResultBtn").disabled = false;
 
       if(mode === "encrypt"){
-        const blob = await encryptMessage(pw, input);
-        document.getElementById("output").value = blob;
-        setStatus(t("status_encrypted"));
+        const file = document.getElementById("fileInput").files[0];
+        const text = document.getElementById("textInput").value;
+
+        if(file && text){
+          const packed = await encryptCombinedPackage(pw, text, file);
+          if(myOp !== state.opId) return;
+          setEncryptedPackage(packed, (file.name || "file") + ".cryptonote");
+          setStatus(t("status_encrypted_combo"));
+        } else if(file){
+          const packed = await encryptCombinedPackage(pw, "", file);
+          if(myOp !== state.opId) return;
+          setEncryptedPackage(packed, (file.name || "file") + ".cryptonote");
+          setStatus(t("status_encrypted_file"));
+        } else if(text){
+          const blobText = await encryptTextCompact(pw, text);
+          if(myOp !== state.opId) return;
+          document.getElementById("output").value = blobText;
+          setStatus(t("status_encrypted_text"));
+        } else {
+          setStatus(t("err_need_encrypt_input"));
+          return;
+        }
       } else {
-        const pt = await decryptMessage(pw, input);
-        document.getElementById("output").value = pt;
-        setStatus(t("status_decrypted"));
+        const blobStr = document.getElementById("decryptBlobInput").value.trim();
+        const file = document.getElementById("encryptedPackageInput").files[0];
+
+        if(file){
+          const packedBytes = new Uint8Array(await file.arrayBuffer());
+          if(myOp !== state.opId) return;
+          const result = await decryptCombinedPackage(pw, packedBytes);
+          if(myOp !== state.opId) return;
+
+          if(result.text){
+            decryptedText = result.text;
+            document.getElementById("output").value = result.text;
+            document.getElementById("downloadTextBtn").classList.remove("hidden");
+          } else {
+            document.getElementById("output").value = "";
+          }
+
+          if(result.file){
+            decryptedFileBlob = new Blob([result.file.fileBytes], {type: result.file.mime || "application/octet-stream"});
+            decryptedFileName = result.file.name || "decrypted-file";
+            document.getElementById("decryptedFileInfo").textContent = t("decrypted_file_info", decryptedFileName, result.file.fileBytes.length, result.file.mime);
+            document.getElementById("decryptedFileInfo").classList.remove("hidden");
+            document.getElementById("downloadDecryptedBtn").classList.remove("hidden");
+            document.getElementById("copyResultBtn").disabled = !result.text;
+            if(!result.text){
+              showPreview(decryptedFileBlob, result.file.mime || "application/octet-stream", null);
+            }
+          }
+
+          if(result.text && result.file){
+            showPreview(decryptedFileBlob, result.file.mime || "application/octet-stream", null);
+            setStatus(t("status_decrypted_combo"));
+          } else if(result.file){
+            setStatus(t("status_decrypted_file"));
+          } else if(result.text){
+            setStatus(t("status_decrypted_text"));
+          } else {
+            throw new Error("empty package");
+          }
+        } else if(blobStr){
+          const text = await decryptTextCompact(pw, blobStr);
+          if(myOp !== state.opId) return;
+          decryptedText = text;
+          document.getElementById("output").value = text;
+          document.getElementById("downloadTextBtn").classList.remove("hidden");
+          showPreview(new Blob([text], {type:"text/plain;charset=utf-8"}), "text/plain", text);
+          setStatus(t("status_decrypted_text"));
+        } else {
+          setStatus(t("err_need_decrypt_input"));
+          return;
+        }
       }
-      scheduleAutoClear();
+
+      if(myOp === state.opId){
+        scheduleAutoClear();
+      }
     } catch(e){
+      if(myOp !== state.opId) return;
       document.getElementById("output").value = "";
+      document.getElementById("decryptedFileInfo").classList.add("hidden");
+      document.getElementById("decryptedFileInfo").textContent = "";
+      document.getElementById("downloadDecryptedBtn").classList.add("hidden");
+      document.getElementById("downloadTextBtn").classList.add("hidden");
+      document.getElementById("downloadPackageBtn").disabled = true;
+      document.getElementById("copyResultBtn").disabled = false;
+      decryptedFileBlob = null;
+      decryptedFileName = "";
+      decryptedText = "";
+      encryptedPackageBlob = null;
+      clearPreview();
       setStatus(t("status_decrypt_fail"));
       scheduleAutoClear();
+    } finally {
+      if(myOp === state.opId){
+        state.busy = false;
+        updateBusyUI();
+      }
     }
   }
 
+  document.addEventListener("visibilitychange", () => {
+    if(document.hidden){
+      suspendAutoClear();
+    } else {
+      resumeAutoClear();
+    }
+  });
+
+  window.addEventListener("pagehide", () => {
+    suspendAutoClear();
+  });
+
+  window.addEventListener("pageshow", () => {
+    resumeAutoClear();
+  });
+
   setLang("ro");
+  applyTheme();
+  updateUI();
+  updateBusyUI();
 </script>
 </body>
 </html>
